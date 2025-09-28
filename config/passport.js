@@ -1,7 +1,6 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
 
 passport.use(new LocalStrategy(
   async (username, password, done) => {
@@ -12,5 +11,24 @@ passport.use(new LocalStrategy(
   }
 ));
 
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser((id, done) => User.findById(id).then(user => done(null, user)));
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// Function to deserialize the JWT and return the user object
+const deserializeJWT = async (token, done) => {
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    const user = await User.findById(decodedToken.id);
+    if (!user) {
+      return res.status(401).send('Unauthorized');
+    }
+    done(null, user);
+  } catch (err) {
+    done(err, false);
+  }
+};
+
+passport.deserializeUser(deserializeJWT);
+
+module.exports = passport;
