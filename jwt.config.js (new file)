@@ -1,0 +1,9 @@
+const fs = require('fs');
+const path = require('path');
+
+// Load environment variables from .env file in the root of your project directory.
+require('dotenv').config({ path: `.env${path.sep}${process.env.NODE_ENV}` });
+
+module.exports = {
+  secretKey: process.env.JWT_SECRET || 'yourSecretKeyHere'
+};
