@@ -1,6 +1,6 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 passport.use(new LocalStrategy(
@@ -14,3 +14,18 @@ passport.use(new LocalStrategy(
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => User.findById(id).then(user => done(null, user)));
+
+// JWT strategy
+passport.use(new jwt.Strategy(
+  async (token, done) => {
+    try {
+      const user = await User.findById(token.userId);
+      if (!user) return done(null, false);
+      done(null, user);
+    } catch (error) {
+      done(error, false);
+    }
+  }
+));
+
+module.exports = passport;
