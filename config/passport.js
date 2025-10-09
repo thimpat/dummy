@@ -8,7 +8,10 @@ passport.use(new LocalStrategy(
     const user = await User.findOne({ username });
     if (!user) return done(null, false);
     const isValid = await bcrypt.compare(password, user.password);
-    return isValid ? done(null, user) : done(null, false);
+    return isValid ? done(null, user) => {
+      // Optionally, you can return a token here if needed
+      done(null, user);
+    } : done(null, false);
   }
 ));
 
